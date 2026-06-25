@@ -213,8 +213,9 @@ async function init() {
     const filtered = getFilteredArticles();
     filtered.forEach((a) => {
       const idx = articles.indexOf(a);
+      const num = articles.indexOf(a) + 1;
       const li = document.createElement('li');
-      li.textContent = a.title;
+      li.textContent = `${num}. ${a.title}`;
       li.addEventListener('click', () => selectArticle(idx));
       dropdown.appendChild(li);
     });
@@ -223,7 +224,8 @@ async function init() {
   }
 
   function selectArticle(i) {
-    trigger.textContent = articles[i].title;
+    const num = i + 1;
+    trigger.textContent = `${num}. ${articles[i].title}`;
     dropdown.querySelectorAll('li').forEach((li) => li.classList.remove('selected'));
     dropdown.classList.remove('open');
     runAnalysis(articles[i]);
