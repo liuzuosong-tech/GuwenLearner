@@ -64,7 +64,7 @@ content = ''.join(paragraphs[2:])
 with open('data/articles.json', encoding='utf-8') as f:
     articles = json.load(f)
 
-articles.append({'title': title, 'author': author, 'content': content})
+articles.append({'title': title, 'author': author, 'period': '春秋', 'content': content})
 
 with open('data/articles.json', 'w', encoding='utf-8') as f:
     json.dump(articles, f, ensure_ascii=False, indent=2)
