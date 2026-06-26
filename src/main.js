@@ -125,7 +125,7 @@ function runAnalysis(article) {
   const bgDrawer = document.getElementById('bg-drawer');
 
   if (article.background) {
-    bgToggle.style.display = '';
+    bgToggle.style.display = 'inline-block';
     bgToggle.onclick = () => {
       const paragraphs = article.background.split('\n\n')
         .map(p => `<p>${p}</p>`).join('');
