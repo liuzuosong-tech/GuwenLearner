@@ -116,10 +116,27 @@ function runAnalysis(article) {
   currentXuciMatches = analyze(text, xuciData);
 
   document.getElementById('text-display').innerHTML =
-    highlightText(text, currentShiciMatches, currentXuciMatches, article.keyPhrases || []);
+    highlightText(text, currentShiciMatches, currentXuciMatches, article.keyPhrases || [], article.annotations || []);
 
   document.getElementById('article-title').textContent =
     `${article.title}（${article.author}）`;
+
+  const bgToggle = document.getElementById('bg-toggle');
+  const bgDrawer = document.getElementById('bg-drawer');
+
+  if (article.background) {
+    bgToggle.style.display = '';
+    bgToggle.onclick = () => {
+      const paragraphs = article.background.split('\n\n')
+        .map(p => `<p>${p}</p>`).join('');
+      document.getElementById('bg-drawer-content').innerHTML =
+        `<h3>${article.title} · 背景</h3>${paragraphs}`;
+      bgDrawer.classList.add('open');
+    };
+  } else {
+    bgToggle.style.display = 'none';
+    bgDrawer.classList.remove('open');
+  }
 
   document.getElementById('text-display').querySelectorAll('mark[data-word]').forEach(mark => {
     mark.addEventListener('click', () => showWordModal(mark.dataset.word));
@@ -130,7 +147,13 @@ async function init() {
   await loadData();
 
   document.getElementById('word-drawer-close').addEventListener('click', hideWordModal);
-  document.addEventListener('keydown', (e) => { if (e.key === 'Escape') hideWordModal(); });
+  document.getElementById('bg-drawer-close').addEventListener('click', () => {
+    document.getElementById('bg-drawer').classList.remove('open');
+  });
+  document.addEventListener('keydown', (e) => { if (e.key === 'Escape') {
+    hideWordModal();
+    document.getElementById('bg-drawer').classList.remove('open');
+  }});
   document.addEventListener('click', (e) => {
     if (!e.target.closest('mark') && !e.target.closest('#word-drawer')) hideWordModal();
   });

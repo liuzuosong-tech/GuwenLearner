@@ -31,7 +31,8 @@ export function analyze(text, wordMap) {
 
 // Highlight all matched words in the text with <mark> tags
 // keyPhrases: [{word, sentence}] — mark specific word in specific sentence as 'key'
-export function highlightText(text, shiciMatches, xuciMatches, keyPhrases = []) {
+// annotations: [{word, phonetic, desc}] — mark with ruby phonetic and tooltip
+export function highlightText(text, shiciMatches, xuciMatches, keyPhrases = [], annotations = []) {
   const allWords = [
     ...Object.keys(shiciMatches).map(w => ({ word: w, type: 'shici' })),
     ...Object.keys(xuciMatches).map(w => ({ word: w, type: 'xuci' })),
@@ -39,7 +40,6 @@ export function highlightText(text, shiciMatches, xuciMatches, keyPhrases = []) 
 
   allWords.sort((a, b) => b.word.length - a.word.length);
 
-  // Store type and word for each char position
   const chars = Array.from(text).map(ch => ({ ch, type: null, word: null }));
 
   for (const { word, type } of allWords) {
@@ -56,13 +56,26 @@ export function highlightText(text, shiciMatches, xuciMatches, keyPhrases = []) 
     }
   }
 
-  // Build a Set of char positions that are "key" highlighted
-  // For each keyPhrase, find the sentence in text, then mark the word inside it
+  // Mark annotation positions
+  const annotationMap = {}; // startIndex -> annotation
+  for (const ann of annotations) {
+    const wChars = Array.from(ann.word);
+    for (let i = 0; i <= chars.length - wChars.length; i++) {
+      if (wChars.every((c, j) => chars[i + j].ch === c) &&
+          wChars.every((c, j) => chars[i + j].type === null)) {
+        for (let j = 0; j < wChars.length; j++) {
+          chars[i + j].type = 'annotation';
+          chars[i + j].word = ann.word;
+        }
+        annotationMap[i] = ann;
+      }
+    }
+  }
+
   const keyPositions = new Set();
   for (const { word, sentence } of keyPhrases) {
     const sentIdx = text.indexOf(sentence);
     if (sentIdx === -1) continue;
-    // Find word within that sentence occurrence
     const wordIdx = text.indexOf(word, sentIdx);
     if (wordIdx === -1 || wordIdx > sentIdx + sentence.length) continue;
     for (let k = 0; k < Array.from(word).length; k++) {
@@ -78,12 +91,18 @@ export function highlightText(text, shiciMatches, xuciMatches, keyPhrases = []) 
       let span = '';
       const currentWord = word;
       const isKey = keyPositions.has(i);
+      const ann = annotationMap[i];
       while (i < chars.length && chars[i].word === currentWord) {
         span += chars[i].ch;
         i++;
       }
-      const cls = isKey ? `mark-key` : `mark-${type}`;
-      html += `<mark class="${cls}" data-word="${currentWord}">${span}</mark>`;
+      if (type === 'annotation' && ann) {
+        const safeDesc = ann.desc.replace(/"/g, '&quot;');
+        html += `<mark class="mark-annotation" data-annotation="${safeDesc}" title="${safeDesc}"><ruby>${span}<rt>${ann.phonetic}</rt></ruby></mark>`;
+      } else {
+        const cls = isKey ? `mark-key` : `mark-${type}`;
+        html += `<mark class="${cls}" data-word="${currentWord}">${span}</mark>`;
+      }
     } else {
       html += ch === '\n' ? '<br>' : ch;
       i++;

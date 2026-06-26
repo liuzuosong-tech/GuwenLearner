@@ -32,7 +32,10 @@
       <div id="article-nav"></div>
     </div>
     <div id="article-body">
-      <div id="article-title"></div>
+      <div class="article-header">
+        <div id="article-title"></div>
+        <button id="bg-toggle" title="背景信息" style="display:none">背景</button>
+      </div>
       <div id="text-display"></div>
     </div>
   </div>
@@ -41,6 +44,12 @@
   <div id="word-drawer" class="word-drawer">
     <button id="word-drawer-close">✕</button>
     <div id="word-drawer-content"></div>
+  </div>
+
+  <!-- 背景信息侧边抽屉 -->
+  <div id="bg-drawer" class="bg-drawer">
+    <button id="bg-drawer-close">✕</button>
+    <div id="bg-drawer-content"></div>
   </div>
 
   <script type="module" src="src/main.js"></script>
